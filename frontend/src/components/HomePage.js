@@ -15,12 +15,16 @@ export default class HomePage extends Component {
   }
 
   render() {
+
+
+
     return (
       <Router>
+        
         <Routes>
-          <Route exact path="/"  elements={<p>This is the home page</p>} />
-          <Route exact path="/join" element={<RoomJoinPage />} />
-          <Route exact path="/create" element={<CreateRoomPage />} />
+          <Route path="/" />
+          <Route path="/join" element={<RoomJoinPage />} />
+          <Route path="/create" element={<CreateRoomPage />} />
         </Routes>
       </Router>
     );
