@@ -1,22 +1,23 @@
 from django.shortcuts import render
 from rest_framework import generics, status
-from rest_framework import generics
-from .serializers import CreateRoomSerializer, RoomSerializer 
+from .serializers import RoomSerializer, CreateRoomSerializer
 from .models import Room
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
 # Create your views here.
-#list/Create APIVIEW
-class RoomView(generics.CreateAPIView):
+
+
+class RoomView(generics.ListAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
+
 class CreateRoomView(APIView):
     serializer_class = CreateRoomSerializer
-#thing like facebook that they know that they are already signed in so it doest keep asking user to keep signing in
-    def post(self, Requst, format = None):
+
+    def post(self, request, format=None):
         if not self.request.session.exists(self.request.session.session_key):
             self.request.session.create()
 
@@ -28,11 +29,14 @@ class CreateRoomView(APIView):
             queryset = Room.objects.filter(host=host)
             if queryset.exists():
                 room = queryset[0]
-                room.guest_can_puase = guest_can_pause
+                room.guest_can_pause = guest_can_pause
                 room.votes_to_skip = votes_to_skip
                 room.save(update_fields=['guest_can_pause', 'votes_to_skip'])
+                return Response(RoomSerializer(room).data, status=status.HTTP_200_OK)
             else:
-                room = Room(host=host, guest_can_pause=guest_can_pause, votes_to_skip=votes_to_skip)
+                room = Room(host=host, guest_can_pause=guest_can_pause,
+                            votes_to_skip=votes_to_skip)
                 room.save()
+                return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
 
-            return Response(RoomSerializer(room).data, status=status.HTTP_204)
+        return Response({'Bad Request': 'Invalid data...'}, status=status.HTTP_400_BAD_REQUEST)
